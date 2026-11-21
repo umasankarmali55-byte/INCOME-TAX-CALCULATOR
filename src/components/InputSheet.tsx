@@ -39,6 +39,7 @@ interface InputSheetProps {
   onToggleHraNo: (monthIndex: number, checked: boolean) => void;
   onArrearLabelChange: (id: string, label: string) => void;
   onArrearDaChange: (id: string, value: number) => void;
+  onArrearGrossChange: (id: string, value: number) => void;
   onArrearCpfChange: (id: string, rawValue: string) => void;
   onAddArrear: () => void;
   onRemoveArrear: (id: string) => void;
@@ -83,6 +84,7 @@ export const InputSheet: React.FC<InputSheetProps> = ({
   onToggleHraNo,
   onArrearLabelChange,
   onArrearDaChange,
+  onArrearGrossChange,
   onArrearCpfChange,
   onAddArrear,
   onRemoveArrear,
@@ -863,13 +865,14 @@ export const InputSheet: React.FC<InputSheetProps> = ({
                       colSpan={3}
                       className="px-2 py-1.5 text-center font-sans text-[11px] font-medium text-amber-900/80 dark:text-amber-300/80"
                     >
-                      DA Arrear (Gross = DA × 100/90)
+                      Enter DA or Gross (90% ↔ 100%)
                     </td>
                     <td className="px-1.5 py-1.5">
                       <input
                         type="number"
                         aria-label={`${arr.label} DA amount`}
                         placeholder="DA amt"
+                        title="Enter DA arrear amount — Gross auto-calculates (× 100/90)"
                         value={arr.daAmount}
                         onChange={(e) =>
                           onArrearDaChange(arr.id, Number(e.target.value) || 0)
@@ -878,8 +881,18 @@ export const InputSheet: React.FC<InputSheetProps> = ({
                       />
                     </td>
                     <td />
-                    <td className="px-2.5 py-1.5 text-right font-extrabold text-amber-900 dark:text-amber-200">
-                      {fmtRupee(arr.grossAmount)}
+                    <td className="px-1.5 py-1.5">
+                      <input
+                        type="number"
+                        aria-label={`${arr.label} Gross amount`}
+                        placeholder="Gross amt"
+                        title="Enter Gross arrear amount — DA auto-calculates (× 90/100)"
+                        value={arr.grossAmount}
+                        onChange={(e) =>
+                          onArrearGrossChange(arr.id, Number(e.target.value) || 0)
+                        }
+                        className="w-full min-w-[78px] rounded-md border border-amber-400 bg-white px-2 py-1 text-right text-xs font-extrabold text-amber-900 focus:border-amber-600 focus:outline-none dark:border-amber-700 dark:bg-slate-950 dark:text-amber-200"
+                      />
                     </td>
                     <td className="px-1.5 py-1.5">
                       <input

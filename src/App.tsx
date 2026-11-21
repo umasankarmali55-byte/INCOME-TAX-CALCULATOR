@@ -27,13 +27,15 @@ import {
 import {
   applyGPFToRows,
   computeAnnualTax,
+  computeArrearDaFromGross,
   computeNextYearTax,
   createDefaultTaxState,
   fmtRupee,
   recomputeHRAForRows,
 } from './utils/taxEngine';
 
-const STORAGE_KEY = 'govttax_india_state_v1';
+const LEGACY_STORAGE_KEY = 'govttax_india_state_v1';
+const STORAGE_KEY = 'govttax_india_state_v2';
 const THEME_KEY = 'govttax_india_theme_v1';
 const DESIGN_KEY = 'govttax_india_design_v1';
 
@@ -49,6 +51,10 @@ const OLD_DEFAULT_DA = [53, 55, 55, 55, 55, 55, 55, 58, 58, 58, 58, 58];
 
 function loadSavedState(): TaxState {
   try {
+    // Clear legacy cached sample so the replaced dummy PAN takes effect cleanly
+    if (localStorage.getItem(LEGACY_STORAGE_KEY)) {
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+    }
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return createDefaultTaxState();
     const parsed = JSON.parse(raw) as Partial<TaxState>;
@@ -259,6 +265,23 @@ export default function App() {
           ? {
               ...a,
               daAmount,
+              grossOverride: null,
+              cpfOverride: prev.pen.startsWith('NPS') ? null : a.cpfOverride,
+            }
+          : a
+      ),
+    }));
+  }, []);
+
+  const handleArrearGrossChange = useCallback((id: string, grossAmount: number) => {
+    setState((prev) => ({
+      ...prev,
+      arrears: prev.arrears.map((a) =>
+        a.id === id
+          ? {
+              ...a,
+              daAmount: computeArrearDaFromGross(grossAmount),
+              grossOverride: grossAmount,
               cpfOverride: prev.pen.startsWith('NPS') ? null : a.cpfOverride,
             }
           : a
@@ -717,6 +740,7 @@ export default function App() {
             onToggleHraNo={handleToggleHraNo}
             onArrearLabelChange={handleArrearLabelChange}
             onArrearDaChange={handleArrearDaChange}
+            onArrearGrossChange={handleArrearGrossChange}
             onArrearCpfChange={handleArrearCpfChange}
             onAddArrear={handleAddArrear}
             onRemoveArrear={handleRemoveArrear}
@@ -729,6 +753,36 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* Developer Credit Footer */}
+      <footer className="no-print mx-auto max-w-[1440px] px-4 pb-8 pt-2 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-indigo-200/80 bg-white px-5 py-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex items-center gap-3.5">
+            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full border-2 border-indigo-500 bg-gradient-to-br from-[#0F3D5E] to-[#17337A] shadow-xs dark:border-amber-400">
+              <img
+                src="/assets/aistudio/ghhghjj_68a0d2dc.jpg"
+                alt="UMA SANKAR MALI — Developer"
+                referrerPolicy="no-referrer"
+                className="h-full w-full object-cover object-top"
+              />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-indigo-700 dark:text-amber-300">
+                Developed by
+              </div>
+              <div className="text-base font-extrabold tracking-tight text-slate-900 dark:text-white">
+                UMA SANKAR MALI
+              </div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                Indian Govt Employee Income Tax Calculator PWA
+              </div>
+            </div>
+          </div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            Offline-ready · All calculations stored locally on your device
+          </div>
+        </div>
+      </footer>
 
       {/* Dedicated A4 Print Container (Visible only during Print / Save as PDF) */}
       <div className="print-only-container hidden">

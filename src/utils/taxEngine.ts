@@ -88,9 +88,9 @@ export function createDefaultTaxState(): TaxState {
     ay: '2027/28',
     name: 'UMA SANKAR MALI',
     desig: 'ASSISTANT TEACHER,LEVEL-V(A)',
-    pan: 'EREPM4055A',
+    pan: 'ABCDE1234F',
     pen: 'OPS (Old Pension Scheme - GPF)',
-    gpfno: 'GPF-4055A',
+    gpfno: 'GPF-123456',
     addr: 'GOVT.UGHS MALDA',
 
     gpf: 10000,
@@ -169,15 +169,25 @@ export function applyGPFToRows(
   }));
 }
 
-export function computeArrearGross(daAmount: number): number {
+export function computeArrearGross(
+  daAmount: number,
+  grossOverride?: number | null
+): number {
+  if (grossOverride !== null && grossOverride !== undefined) {
+    return grossOverride;
+  }
   return Math.round((daAmount * 100) / 90);
+}
+
+export function computeArrearDaFromGross(grossAmount: number): number {
+  return Math.round((grossAmount * 90) / 100);
 }
 
 export function computeArrearCpf(arrear: ArrearRow, isNPS: boolean): number {
   if (isNPS) {
     return arrear.cpfOverride !== null
       ? arrear.cpfOverride
-      : Math.round(computeArrearGross(arrear.daAmount) * 0.1);
+      : Math.round(computeArrearGross(arrear.daAmount, arrear.grossOverride) * 0.1);
   }
   return arrear.cpfOverride ?? 0;
 }
@@ -289,7 +299,7 @@ export function computeAnnualTax(state: TaxState): AnnualComputation {
   });
 
   const arrears: ComputedArrearRow[] = state.arrears.map((a) => {
-    const grossAmount = computeArrearGross(a.daAmount);
+    const grossAmount = computeArrearGross(a.daAmount, a.grossOverride);
     const cpf = computeArrearCpf(a, isNPS);
     totals.da += a.daAmount;
     totals.tot += grossAmount;

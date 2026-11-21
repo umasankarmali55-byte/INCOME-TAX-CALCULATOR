@@ -21,6 +21,7 @@ export interface ArrearRow {
   id: string;
   label: string;
   daAmount: number;
+  grossOverride?: number | null;
   cpfOverride: number | null;
 }
 
