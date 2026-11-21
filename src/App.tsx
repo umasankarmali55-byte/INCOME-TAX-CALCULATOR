@@ -45,6 +45,8 @@ const SHEET_TABS: ReadonlyArray<{id: SheetId; label: string; shortLabel: string}
   {id: 's5', label: 'Next FY Tax', shortLabel: 'Next Tax'},
 ];
 
+const OLD_DEFAULT_DA = [53, 55, 55, 55, 55, 55, 55, 58, 58, 58, 58, 58];
+
 function loadSavedState(): TaxState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -54,9 +56,17 @@ function loadSavedState(): TaxState {
     if (!Array.isArray(parsed.rows) || parsed.rows.length !== 12) {
       return defaults;
     }
+    const isOldSampleDa = parsed.rows.every((r, i) => r.daPct === OLD_DEFAULT_DA[i]);
+    const migratedRows = isOldSampleDa
+      ? parsed.rows.map((r, i) => ({
+          ...r,
+          daPct: i < 2 ? 58 : i < 8 ? 60 : 63,
+        }))
+      : parsed.rows;
     return {
       ...defaults,
       ...parsed,
+      rows: migratedRows,
       hraNo:
         Array.isArray(parsed.hraNo) && parsed.hraNo.length === 12
           ? parsed.hraNo

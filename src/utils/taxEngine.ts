@@ -65,7 +65,7 @@ export function createSampleRows(): MonthlyRow[] {
     basic: i < 8 ? 28200 : 29000,
     lic: 0,
     gis: 0,
-    daPct: i === 0 ? 53 : i < 7 ? 55 : 58,
+    daPct: i < 2 ? 58 : i < 8 ? 60 : 63,
     hra: i < 8 ? 1128 : 1160,
     cpf: i < 2 ? 10000 : 12000,
     cpfManual: false,
