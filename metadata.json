@@ -1,0 +1,6 @@
+{
+  "name": "GovtTax India – Income Tax Calculator PWA",
+  "description": "Offline-ready Progressive Web App for Indian Government employees to compute FY/AY income tax under New and Old Regimes, manage monthly salary, DA/HRA arrears, next-year projections, and export A4 PDF assessment sheets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
